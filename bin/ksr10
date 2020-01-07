@@ -1,0 +1,14 @@
+#!/usr/bin/env ruby
+
+require 'pry'
+require 'ksr10'
+
+begin
+  arm = Ksr10.new
+rescue Ksr10::Error => err
+  execname = File.basename(__FILE__)
+  STDERR.puts "#{execname}: #{err.class::MESSAGE}"
+  exit 2
+end
+arm.pry
+arm.stop
