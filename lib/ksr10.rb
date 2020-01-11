@@ -45,39 +45,39 @@ class Ksr10
   end
 
   # Rotate the base.
-  def base(left_right_stop, duration_ms=0)
-    set_state(left_right_stop, duration_ms, {left: {on: 9, off: 8}, right: {on: 8, off: 9}})
+  def base(left_right_stop, duration_s=0)
+    set_state(left_right_stop, duration_s, {left: {on: 9, off: 8}, right: {on: 8, off: 9}})
   end
 
   # Action the shoulder motor.
-  def shoulder(up_down_stop, duration_ms=0)
-    set_state(up_down_stop, duration_ms, {up: {on: 22, off: 23}, down: {on: 23, off: 22}})
+  def shoulder(up_down_stop, duration_s=0)
+    set_state(up_down_stop, duration_s, {up: {on: 22, off: 23}, down: {on: 23, off: 22}})
   end
 
   # Action the elbow motor.
-  def elbow(up_down_stop, duration_ms=0)
-    set_state(up_down_stop, duration_ms, {up: {on: 20, off: 21}, down: {on: 21, off: 20}})
+  def elbow(up_down_stop, duration_s=0)
+    set_state(up_down_stop, duration_s, {up: {on: 20, off: 21}, down: {on: 21, off: 20}})
   end
 
   # Action the wrist motor.
-  def wrist(up_down_stop, duration_ms=0)
-    set_state(up_down_stop, duration_ms, {up: {on: 18, off: 19}, down: {on: 19, off: 18}})
+  def wrist(up_down_stop, duration_s=0)
+    set_state(up_down_stop, duration_s, {up: {on: 18, off: 19}, down: {on: 19, off: 18}})
   end
 
   # Action the gripper.
-  def gripper(open_close_stop, duration_ms=0)
-    set_state(open_close_stop, duration_ms, {open: {on: 17, off: 16}, close: {on: 16, off: 17}})
+  def gripper(open_close_stop, duration_s=0)
+    set_state(open_close_stop, duration_s, {open: {on: 17, off: 16}, close: {on: 16, off: 17}})
   end
 
   # Turn on or off the LED.
-  def led(on_off, duration_ms=0)
-    set_state(on_off, duration_ms, {on: {on: 0}, off: {off: 0}})
+  def led(on_off, duration_s=0)
+    set_state(on_off, duration_s, {on: {on: 0}, off: {off: 0}})
   end
 
   # Stop all actions and turn off the LED.
-  def stop(duration_ms=0)
+  def stop(duration_s=0)
     @state = 0
-    write_state!(duration_ms)
+    write_state!(duration_s)
     self
   end
 
@@ -87,7 +87,7 @@ class Ksr10
   # permitted state. Bits are numbered from LSB and are 0-indexed.  Returns
   # "self" so that calls may be chained in the style of Fowler's "fluent
   # interface".
-  def set_state(state, duration_ms, spec)
+  def set_state(state, duration_s, spec)
     if state == :stop
       spec.each do |_, bit_flips|
         @state &= ~(1<<bit_flips[:off]) if bit_flips.has_key?(:off)
@@ -100,17 +100,18 @@ class Ksr10
       @state &= ~(1<<bit_flips[:off]) if bit_flips.has_key?(:off)
       @state |= 1<<bit_flips[:on] if bit_flips.has_key?(:on)
     end
-    write_state!(duration_ms)
+    write_state!(duration_s)
     # If we received a duration then flip off the bits we just flipped on.
-    if !duration_ms.zero? && bit_flips && bit_flips.has_key?(:on)
+    if !duration_s.zero? && bit_flips && bit_flips.has_key?(:on)
       @state &= ~(1<<bit_flips[:on])
-      write_state! # return immediately, no duration_ms
+      write_state! # return immediately, no duration_s
     end
     self
   end
 
   # Write the state stored in the instance variable to the device.
-  def write_state!(duration_ms=0)
+  def write_state!(duration_s=0)
+    raise ArgumentError, "Duration #{duration_s}s too long" if duration_s > 30
     data = [@state.to_s(16).rjust(6, '0')].pack('H*')
     @device.open_interface(0) do |handle|
       handle.control_transfer(bmRequestType: 0x40,
@@ -119,7 +120,7 @@ class Ksr10
                               wIndex: 0x00,
                               dataOut: data)
     end
-    sleep(duration_ms / 1000.0)
+    sleep(duration_s)
   end
 
 end # Ksr10

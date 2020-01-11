@@ -22,8 +22,8 @@ require 'ksr10'
 
 arm = Ksr10.new
 arm.led(:on)
-arm.elbow(:down, 500)
-arm.gripper(:close, 1000)
+arm.elbow(:down, 0.5)
+arm.gripper(:close, 1)
 arm.stop
 ```
 
@@ -36,7 +36,7 @@ $ ksr10
  @device=#<LIBUSB::Device 3/2 1267:0001 ? ? ? (Vendor specific (00,00))>,
  @state=1,
  @usb=#<LIBUSB::Context:0x000055da9db68488 @ctx=#<FFI::Pointer address=0x000055da9da582d0>, @hotplug_callbacks={}, @on_pollfd_added=nil, @on_pollfd_removed=nil>>
-[2] pry(#<Ksr10>)> shoulder(:up, 400)
+[2] pry(#<Ksr10>)> shoulder(:up, 0.4)
 => #<Ksr10:0x000055da9db684b0
  @device=#<LIBUSB::Device 3/2 1267:0001 ? ? ? (Vendor specific (00,00))>,
  @state=1,
