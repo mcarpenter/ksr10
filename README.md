@@ -47,7 +47,7 @@ $ ksr10
 ## Install
 
 ```sh
-sudo apt install libusb-1.0-0
+sudo apt install libusb-1.0-0 ruby-dev
 sudo gem install ksr10
 ```
 
